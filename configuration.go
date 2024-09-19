@@ -25,14 +25,20 @@ func ListServiceUpstream() {
 type Configuration struct {
 	env string
 
-	dir string
-	svc *Service
+	flatKeys  map[string]struct{}
+	dir       string
+	svc       *Service
+	assistant *FileAssistant
 }
 
-func (conf *Configuration) initSetting(setting any) (err error) {
+func (conf *Configuration) initSetting(setting any) error {
 	tpe := reflect.TypeOf(setting)
 	if tpe.Kind() != reflect.Ptr {
 		return fmt.Errorf("please pass ptr for setting value")
+	}
+
+	if err := conf.assistant.GenerateDevYML(); err != nil {
+		return err
 	}
 
 	configValue, err := conf.getConfigValue()
@@ -42,12 +48,7 @@ func (conf *Configuration) initSetting(setting any) (err error) {
 
 	conf.setFields(setting, configValue)
 
-	return
-}
-
-// 返回服务的依赖信息
-func (conf *Configuration) listServiceUpstream() {
-
+	return nil
 }
 
 // 设置字段
@@ -60,7 +61,26 @@ func (conf *Configuration) getConfigValue() (configValue map[string]any, err err
 	return
 }
 
+// TODO
+func (conf *Configuration) listServiceUpstream() {
+
+}
+
 func GetEnv() string {
 	env := os.Getenv("ENV")
 	return strings.ToUpper(env)
+}
+
+type FileAssistant struct {
+	flatEnvVar map[string]any
+}
+
+// TODO
+func (assistant *FileAssistant) GenerateDevYML() error {
+	return nil
+}
+
+// TODO
+func (assistant *FileAssistant) GetLocalYMLContent() {
+
 }

@@ -1,12 +1,15 @@
 package service_init_tool
 
 type Service struct {
+	name string
 }
 
-func (svc *Service) GetBasicInfo() {
-
+func newService(name string) *Service {
+	return &Service{
+		name: name,
+	}
 }
 
-func (svc *Service) ListUpstreams() {
+func (svc *Service) GetName() {
 
 }

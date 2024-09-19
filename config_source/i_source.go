@@ -1,6 +1,6 @@
 package config_source
 
-type Source interface {
+type ISource interface {
 	GetFlattenedConfigInfo() (map[string]any, error)
 	parse() error
 }
