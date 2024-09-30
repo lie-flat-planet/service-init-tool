@@ -1,4 +1,4 @@
-package config_value
+package util
 
 import (
 	"reflect"
@@ -8,13 +8,16 @@ import (
 // FlattenMap 把有结构的yaml内容铺平
 func FlattenMap(prefix string, input map[string]any, result map[string]any) {
 	for k, v := range input {
-		newKey := prefix + k
+		if prefix != "" {
+			k = prefix + k
+		}
+
 		val := reflect.ValueOf(v)
 		switch val.Kind() {
 		case reflect.Map:
-			FlattenMap(newKey+".", v.(map[string]any), result)
+			FlattenMap(k+"_", v.(map[string]any), result)
 		default:
-			result[newKey] = v
+			result[k] = v
 		}
 	}
 }
