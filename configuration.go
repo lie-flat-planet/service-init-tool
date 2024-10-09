@@ -5,7 +5,9 @@ import (
 	"github.com/lie-flat-planet/service-init-tool/config_source"
 	"github.com/lie-flat-planet/service-init-tool/envvar"
 	"os"
+	"path/filepath"
 	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -15,12 +17,22 @@ const (
 	EnvPro string = "PRO"
 )
 
-var c *Configuration
+func Init(svcName, dir string, setting any) error {
+	_, filename, _, _ := runtime.Caller(1)
+	dir = filepath.Join(filepath.Dir(filename), dir)
 
-func Init(svcName, dir string, setting any) {
+	cfg := &configuration{
+		dir:    dir,
+		env:    GetEnv(),
+		parser: envvar.NewParser(setting),
+		svc:    newService(svcName),
+	}
+	cfg.injectEnvVarMerger()
 
+	return cfg.initSetting(setting)
 }
 
+// TODO
 func ListServiceUpstream() {
 	// return c.listServiceUpstream()
 }
@@ -30,21 +42,20 @@ func GetEnv() string {
 	return strings.ToUpper(env)
 }
 
-type Configuration struct {
+type configuration struct {
 	dir string
-	// 当前环境
 	env string
 	// 解析出拍平的环境变量
 	parser *envvar.Parser
-	// 解析出依赖
-	// merge环境变量 done
-	merger *envvar.Merger
-	// 将环境变量注入进结构体 (initSetting done)
+	// TODO 解析出依赖
+	// merge环境变量
+	envVarMerger *envvar.Merger
 
 	svc *Service
 }
 
-func (conf *Configuration) initSetting(setting any) error {
+// initSetting 将环境变量注入进结构体
+func (conf *configuration) initSetting(setting any) error {
 	tpe := reflect.TypeOf(setting)
 	if tpe.Kind() != reflect.Ptr {
 		return fmt.Errorf("please pass ptr for setting value")
@@ -67,22 +78,26 @@ func (conf *Configuration) initSetting(setting any) error {
 	return nil
 }
 
-func (conf *Configuration) getConfigValue() (configValue map[string]any, err error) {
-	m := envvar.NewMerger(conf.parser.GetFlattenedEnvVarKeys(), config_source.NewEnvVar(), conf.getLocalYMLSource())
-
-	return m.Action()
+func (conf *configuration) getConfigValue() (configValue map[string]any, err error) {
+	return conf.envVarMerger.Action()
 }
 
-func (conf *Configuration) getLocalYMLSource() config_source.ISource {
+func (conf *configuration) injectEnvVarMerger() {
+	conf.envVarMerger = envvar.NewMerger(conf.parser.GetFlattenedEnvVarKeys(), conf.listEnvVarSource()...)
+}
+
+func (conf *configuration) listEnvVarSource() []config_source.ISource {
+	list := []config_source.ISource{config_source.NewEnvVar()}
+
 	if conf.env == EnvDev || conf.env == "" {
-		return config_source.NewYamlFile(conf.dir + "/local.yml")
+		list = append(list, config_source.NewYamlFile(conf.dir+"/local.yml"))
 	}
 
-	return nil
+	return list
 }
 
 // TODO
-func (conf *Configuration) listServiceUpstream() {
+func (conf *configuration) listServiceUpstream() {
 
 }
 
