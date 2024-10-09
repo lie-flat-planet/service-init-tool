@@ -1,0 +1,10 @@
+Age: 30
+Goods_Number: qa123445678
+Goods_Size: 100
+Mysql_DbName: "44"
+Mysql_Host: "11"
+Mysql_MaxIdleConn: 5
+Mysql_MaxOpenConn: 10
+Mysql_Password: "33"
+Mysql_User: "22"
+Name: xiaoxlm

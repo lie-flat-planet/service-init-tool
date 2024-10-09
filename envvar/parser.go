@@ -78,6 +78,21 @@ func structEnvVar(v any) ([]byte, error) {
 		field := val.Field(i)
 		fieldType := typ.Field(i)
 
+		if fieldType.Anonymous {
+			anonymousData, _ := structEnvVar(field.Addr().Interface())
+			var anonymousMap map[string]any
+			_ = yaml.Unmarshal(anonymousData, &anonymousMap)
+
+			for anonymousK, anonymousV := range anonymousMap {
+				data[anonymousK] = anonymousV
+			}
+			continue
+		}
+
+		if _, skipOK := fieldType.Tag.Lookup("skipEnv"); skipOK {
+			continue
+		}
+
 		_, tagOK := fieldType.Tag.Lookup("env")
 		if field.Kind() != reflect.Ptr && field.Kind() != reflect.Struct && !tagOK {
 			continue

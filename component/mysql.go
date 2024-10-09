@@ -11,27 +11,18 @@ import (
 var mysqlOnce = &sync.Once{}
 
 type MySqlConfig struct {
-	Host                          string `env:""`
-	User                          string `env:""`
-	Password                      string `env:""`
-	DbName                        string `env:""`
-	MaxIdleConn                   int    `env:""`
-	MaxOpenConn                   int    `env:""`
-	DefaultStringSize             uint   `env:""`
-	DefaultDatetimePrecision      int    `env:""`
-	DisableDatetimePrecision      bool   `env:""`
-	DontSupportRenameIndex        bool   `env:""`
-	DontSupportRenameColumn       bool   `env:""`
-	DontSupportForShareClause     bool   `env:""`
-	DontSupportNullAsDefaultValue bool   `env:""`
-	DontSupportRenameColumnUnique bool   `env:""`
-	SkipInitializeWithVersion     bool   `env:""`
+	Host        string `env:""`
+	User        string `env:""`
+	Password    string `env:""`
+	DbName      string `env:""`
+	MaxIdleConn int    `env:""`
+	MaxOpenConn int    `env:""`
 }
 
 type Mysql struct {
 	MySqlConfig
 
-	db *gorm.DB
+	db *gorm.DB `skipEnv:""`
 }
 
 func (mysql *Mysql) NewInstance(opts ...ClientOptionInterface[*gorm.Config, *gorm.DB]) (*gorm.DB, error) {
@@ -80,15 +71,9 @@ func (mysql *Mysql) formConfig() gormMysql.Config {
 		// DSN data source name
 		DSN: dsn,
 		// string 类型字段的默认长度
-		DefaultStringSize: mysql.DefaultStringSize,
+		DefaultStringSize: 256,
 		// 禁用 datetime 精度，MySQL 5.6 之前的数据库不支持
-		DisableDatetimePrecision: mysql.DisableDatetimePrecision,
-		// 重命名索引时采用删除并新建的方式，MySQL 5.7 之前的数据库和 MariaDB 不支持重命名索引
-		DontSupportRenameIndex: mysql.DontSupportRenameIndex,
-		// 用 `change` 重命名列，MySQL 8 之前的数据库和 MariaDB 不支持重命名列
-		DontSupportRenameColumn: mysql.DontSupportRenameColumn,
-		// 根据版本自动配置
-		SkipInitializeWithVersion: mysql.SkipInitializeWithVersion,
+		DisableDatetimePrecision: true,
 	}
 
 	return mysqlConfig

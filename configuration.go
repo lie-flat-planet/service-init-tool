@@ -90,7 +90,16 @@ func (conf *configuration) listEnvVarSource() []config_source.ISource {
 	list := []config_source.ISource{config_source.NewEnvVar()}
 
 	if conf.env == EnvDev || conf.env == "" {
-		list = append(list, config_source.NewYamlFile(conf.dir+"/local.yml"))
+		localYMLPath := conf.dir + "/local.yml"
+
+		_, err := os.Stat(localYMLPath)
+		if err == nil {
+			list = append(list, config_source.NewYamlFile(localYMLPath))
+		} else {
+			if !os.IsNotExist(err) {
+				panic(err)
+			}
+		}
 	}
 
 	return list
