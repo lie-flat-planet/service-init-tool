@@ -12,6 +12,10 @@ type Merger struct {
 }
 
 func NewMerger(envVarKeys map[string]struct{}, sources ...config_source.ISource) *Merger {
+	if len(envVarKeys) < 1 {
+		panic("env var key's length is empty")
+	}
+
 	return &Merger{
 		envVarKeys: envVarKeys,
 		sources:    sources,

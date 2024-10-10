@@ -8,3 +8,5 @@ Mysql_MaxOpenConn: 10
 Mysql_Password: "33"
 Mysql_User: "22"
 Name: xiaoxlm
+Server_HttpPort: 80
+Server_LogLevel: DEBUG
