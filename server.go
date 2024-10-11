@@ -6,6 +6,7 @@ type Server struct {
 	Name     string
 	LogLevel string `env:""`
 	HttpPort uint   `env:""`
+	RunMode  string `env:""`
 }
 
 func (s *Server) GetHttpPort() uint {
