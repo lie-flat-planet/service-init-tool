@@ -3,7 +3,9 @@ package service_init_tool
 import "github.com/lie-flat-planet/service-init-tool/log"
 
 type Server struct {
-	Name     string
+	Name string
+	// service code
+	Code     int
 	LogLevel string `env:""`
 	HttpPort uint   `env:""`
 	RunMode  string `env:""`
