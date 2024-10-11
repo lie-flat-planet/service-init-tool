@@ -25,6 +25,10 @@ type Mysql struct {
 	db *gorm.DB `skipEnv:""`
 }
 
+func (mysql *Mysql) GetDB() *gorm.DB {
+	return mysql.db
+}
+
 func (mysql *Mysql) NewInstance(opts ...ClientOptionInterface[*gorm.Config, *gorm.DB]) (*gorm.DB, error) {
 	var err error
 	mysqlOnce.Do(
