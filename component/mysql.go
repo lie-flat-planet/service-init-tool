@@ -2,10 +2,13 @@ package component
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"sync"
+	"time"
 
 	gormMysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var mysqlOnce = &sync.Once{}
@@ -17,6 +20,7 @@ type MySqlConfig struct {
 	DbName      string `env:""`
 	MaxIdleConn int    `env:""`
 	MaxOpenConn int    `env:""`
+	IgnoreLog   bool   `env:""`
 }
 
 type Mysql struct {
@@ -25,11 +29,7 @@ type Mysql struct {
 	db *gorm.DB `skipEnv:""`
 }
 
-func (mysql *Mysql) GetDB() *gorm.DB {
-	return mysql.db
-}
-
-func (mysql *Mysql) NewInstance(opts ...ClientOptionInterface[*gorm.Config, *gorm.DB]) (*gorm.DB, error) {
+func (mysql *Mysql) GetDB(opts ...ClientOptionInterface[*gorm.Config, *gorm.DB]) (*gorm.DB, error) {
 	var err error
 	mysqlOnce.Do(
 		func() {
@@ -44,6 +44,12 @@ func (mysql *Mysql) dialAndSetConn(opts ...ClientOptionInterface[*gorm.Config, *
 	var gormOptions []gorm.Option
 	for _, ops := range opts {
 		gormOptions = append(gormOptions, ops.(gorm.Option))
+	}
+
+	if !mysql.IgnoreLog {
+		gormOptions = append(gormOptions, &gorm.Config{
+			Logger: mysql.newLogger(),
+		})
 	}
 
 	// 初始化 mysql client
@@ -81,4 +87,17 @@ func (mysql *Mysql) formConfig() gormMysql.Config {
 	}
 
 	return mysqlConfig
+}
+
+func (mysql *Mysql) newLogger() logger.Interface {
+	return logger.New(
+		logrus.StandardLogger(),
+		logger.Config{
+			SlowThreshold:             200 * time.Millisecond,
+			Colorful:                  false,
+			IgnoreRecordNotFoundError: false,
+			ParameterizedQueries:      false,
+			LogLevel:                  logger.Info,
+		},
+	)
 }
