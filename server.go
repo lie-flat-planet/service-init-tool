@@ -15,11 +15,13 @@ func (s *Server) GetHttpPort() uint {
 	return s.HttpPort
 }
 
-func (s *Server) Init() {
+func (s *Server) Init() error {
 	l := &log.Log{
 		Name:  s.Name,
 		Level: s.LogLevel,
 	}
 
 	l.SetDefaults().Build()
+
+	return nil
 }

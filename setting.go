@@ -110,10 +110,11 @@ func initSetting(setting any) {
 	for i := 0; i < rv.NumField(); i++ {
 		value := rv.Field(i)
 
-		server, ok := value.Interface().(*Server)
+		component, ok := value.Interface().(interface{ Init() error })
 		if ok {
-			server.Init()
-			break
+			if err := component.Init(); err != nil {
+				panic(err)
+			}
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package component
 
 import (
+	"context"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"sync"
@@ -11,7 +12,9 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var mysqlOnce = &sync.Once{}
+var (
+	mysqlOnce = &sync.Once{}
+)
 
 type MySqlConfig struct {
 	Host        string `env:""`
@@ -21,6 +24,8 @@ type MySqlConfig struct {
 	MaxIdleConn int    `env:""`
 	MaxOpenConn int    `env:""`
 	IgnoreLog   bool   `env:""`
+	// models is the gorm Models
+	models []any
 }
 
 type Mysql struct {
@@ -29,15 +34,40 @@ type Mysql struct {
 	db *gorm.DB `skipEnv:""`
 }
 
-func (mysql *Mysql) GetDB(opts ...ClientOptionInterface[*gorm.Config, *gorm.DB]) (*gorm.DB, error) {
+// Init 会被工具自动执行。研发不应该调用该方法
+func (mysql *Mysql) Init() error {
 	var err error
 	mysqlOnce.Do(
 		func() {
-			err = mysql.dialAndSetConn(opts...)
+			err = mysql.dialAndSetConn()
 		},
 	)
+	if err != nil {
+		return fmt.Errorf("mysql init error. %w", err)
+	}
 
-	return mysql.db, err
+	return mysql.ping()
+}
+
+// NewInstance 如果你对实例需要进行新的配置，你可以使用该方法覆写 mysql.db
+func (mysql *Mysql) NewInstance(opts ...ClientOptionInterface[*gorm.Config, *gorm.DB]) error {
+	if err := mysql.dialAndSetConn(opts...); err != nil {
+		return err
+	}
+
+	return mysql.ping()
+}
+
+func (mysql *Mysql) GetSession(ctx context.Context) *gorm.DB {
+	return mysql.db.WithContext(ctx)
+}
+
+func (mysql *Mysql) AppendModel(model ...any) {
+	mysql.models = append(mysql.models, model...)
+}
+
+func (mysql *Mysql) MigrateTable() error {
+	return mysql.db.AutoMigrate(mysql.models...)
 }
 
 func (mysql *Mysql) dialAndSetConn(opts ...ClientOptionInterface[*gorm.Config, *gorm.DB]) error {
@@ -100,4 +130,13 @@ func (mysql *Mysql) newLogger() logger.Interface {
 			LogLevel:                  logger.Info,
 		},
 	)
+}
+
+func (mysql *Mysql) ping() error {
+	sqlDB, err := mysql.db.DB()
+	if err != nil {
+		return fmt.Errorf("get sqldb error. %w", err)
+	}
+
+	return sqlDB.Ping()
 }
