@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"context"
 	"fmt"
 	"github.com/lie-flat-planet/service-init-tool/component/option"
 	"github.com/sirupsen/logrus"
@@ -59,8 +58,12 @@ func (mysql *Mysql) NewInstance(opts ...option.ClientOptionInterface[*gorm.Confi
 	return mysql.ping()
 }
 
-func (mysql *Mysql) GetSession(ctx context.Context) *gorm.DB {
-	return mysql.db.WithContext(ctx)
+func (mysql *Mysql) GetSession(cfg ...*gorm.Session) *gorm.DB {
+	if len(cfg) < 1 {
+		return mysql.db.Session(&gorm.Session{})
+	}
+
+	return mysql.db.Session(cfg[0])
 }
 
 func (mysql *Mysql) AppendModel(model ...any) {
