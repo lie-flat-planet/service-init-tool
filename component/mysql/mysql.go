@@ -1,8 +1,9 @@
-package component
+package mysql
 
 import (
 	"context"
 	"fmt"
+	"github.com/lie-flat-planet/service-init-tool/component/option"
 	"github.com/sirupsen/logrus"
 	"sync"
 	"time"
@@ -50,7 +51,7 @@ func (mysql *Mysql) Init() error {
 }
 
 // NewInstance 如果你对实例需要进行新的配置，你可以使用该方法覆写 mysql.db
-func (mysql *Mysql) NewInstance(opts ...ClientOptionInterface[*gorm.Config, *gorm.DB]) error {
+func (mysql *Mysql) NewInstance(opts ...option.ClientOptionInterface[*gorm.Config, *gorm.DB]) error {
 	if err := mysql.dialAndSetConn(opts...); err != nil {
 		return err
 	}
@@ -66,12 +67,23 @@ func (mysql *Mysql) AppendModel(model ...any) {
 	mysql.models = append(mysql.models, model...)
 }
 
-func (mysql *Mysql) MigrateTable() error {
+// MigrateAll 配合 AppendModel, 一般用与迁移所有表。
+// 如果一次性只是迁移部分表，建议使用 MigrateTable
+func (mysql *Mysql) MigrateAll() error {
 	return mysql.db.AutoMigrate(mysql.models...)
 }
 
-func (mysql *Mysql) dialAndSetConn(opts ...ClientOptionInterface[*gorm.Config, *gorm.DB]) error {
-	var gormOptions []gorm.Option
+// MigrateTable 用于迁移部分表
+func (mysql *Mysql) MigrateTable(model ...any) error {
+	return mysql.db.AutoMigrate(model...)
+}
+
+func (mysql *Mysql) dialAndSetConn(opts ...option.ClientOptionInterface[*gorm.Config, *gorm.DB]) error {
+	var gormOptions = []gorm.Option{
+		&gorm.Config{
+			DisableForeignKeyConstraintWhenMigrating: true, // 禁用自动创建数据库外键约束
+		},
+	}
 	for _, ops := range opts {
 		gormOptions = append(gormOptions, ops.(gorm.Option))
 	}

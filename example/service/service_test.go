@@ -2,7 +2,7 @@ package service
 
 import (
 	service_init_tool "github.com/lie-flat-planet/service-init-tool"
-	"github.com/lie-flat-planet/service-init-tool/component"
+	"github.com/lie-flat-planet/service-init-tool/component/mysql"
 	"github.com/lie-flat-planet/service-init-tool/util"
 	"github.com/sirupsen/logrus"
 	"testing"
@@ -10,7 +10,7 @@ import (
 
 type Config struct {
 	Server *service_init_tool.Server
-	Mysql  *component.Mysql
+	Mysql  *mysql.Mysql
 	Name   string `env:""`
 	Age    uint   `env:""`
 
@@ -29,12 +29,12 @@ var Setting = &Config{
 		HttpPort: 80,
 	},
 
-	Mysql: &component.Mysql{
-		MySqlConfig: component.MySqlConfig{
-			Host:        "11",
-			User:        "22",
-			Password:    "33",
-			DbName:      "44",
+	Mysql: &mysql.Mysql{
+		MySqlConfig: mysql.MySqlConfig{
+			Host:        "127.0.0.1:3306",
+			User:        "root",
+			Password:    "",
+			DbName:      "",
 			MaxIdleConn: 5,
 			MaxOpenConn: 10,
 		},

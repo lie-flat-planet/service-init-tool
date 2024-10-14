@@ -1,4 +1,4 @@
-package component
+package option
 
 import (
 	goRedis "github.com/go-redis/redis/v8"
