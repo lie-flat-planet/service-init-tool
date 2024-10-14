@@ -49,6 +49,10 @@ func (mysql *Mysql) Init() error {
 	return mysql.ping()
 }
 
+func (mysql *Mysql) GetDB() *gorm.DB {
+	return mysql.db
+}
+
 // NewInstance 如果你对实例需要进行新的配置，你可以使用该方法覆写 mysql.db
 func (mysql *Mysql) NewInstance(opts ...option.ClientOptionInterface[*gorm.Config, *gorm.DB]) error {
 	if err := mysql.dialAndSetConn(opts...); err != nil {
@@ -58,7 +62,7 @@ func (mysql *Mysql) NewInstance(opts ...option.ClientOptionInterface[*gorm.Confi
 	return mysql.ping()
 }
 
-func (mysql *Mysql) GetSession(cfg ...*gorm.Session) *gorm.DB {
+func (mysql *Mysql) NewSession(cfg ...*gorm.Session) *gorm.DB {
 	if len(cfg) < 1 {
 		return mysql.db.Session(&gorm.Session{})
 	}
