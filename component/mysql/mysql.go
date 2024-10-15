@@ -16,7 +16,7 @@ var (
 	mysqlOnce = &sync.Once{}
 )
 
-type MySqlConfig struct {
+type Config struct {
 	Host        string `env:""`
 	User        string `env:""`
 	Password    string `env:""`
@@ -29,7 +29,7 @@ type MySqlConfig struct {
 }
 
 type Mysql struct {
-	MySqlConfig
+	Config
 
 	db *gorm.DB `skipEnv:""`
 }

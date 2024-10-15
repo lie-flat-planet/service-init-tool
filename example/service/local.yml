@@ -1,1 +1,5 @@
 Goods_Size: 1000
+Mysql_DbName: liming
+Redis_Host: "127.0.0.1:6379"
+Redis_Password: xxxx # write your own password
+Mysql_Password: xxxx # write your own password

@@ -3,6 +3,7 @@ package service
 import (
 	service_init_tool "github.com/lie-flat-planet/service-init-tool"
 	"github.com/lie-flat-planet/service-init-tool/component/mysql"
+	"github.com/lie-flat-planet/service-init-tool/component/redis"
 	"github.com/lie-flat-planet/service-init-tool/util"
 	"github.com/sirupsen/logrus"
 	"testing"
@@ -11,6 +12,7 @@ import (
 type Config struct {
 	Server *service_init_tool.Server
 	Mysql  *mysql.Mysql
+	Redis  *redis.Redis
 	Name   string `env:""`
 	Age    uint   `env:""`
 
@@ -24,19 +26,27 @@ type Goods struct {
 
 var Setting = &Config{
 	Server: &service_init_tool.Server{
-		Name:     "demo",
-		LogLevel: "DEBUG",
-		HttpPort: 80,
+		Name: "demo",
+		Code: 999 * 1e3,
 	},
-
 	Mysql: &mysql.Mysql{
-		MySqlConfig: mysql.MySqlConfig{
+		Config: mysql.Config{
 			Host:        "127.0.0.1:3306",
 			User:        "root",
 			Password:    "",
 			DbName:      "",
 			MaxIdleConn: 5,
 			MaxOpenConn: 10,
+		},
+	},
+	Redis: &redis.Redis{
+		Config: redis.Config{
+			Host:     "",
+			Username: "",
+			Password: "",
+			DB:       0,
+			PoolSize: 5,
+			Timeout:  0,
 		},
 	},
 	Name: "xiaoxlm",
