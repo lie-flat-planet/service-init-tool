@@ -37,8 +37,6 @@ func (log *Log) Build() {
 	logrus.SetReportCaller(true)
 	logrus.AddHook(NewServiceHook(log.Name))
 	logrus.SetOutput(os.Stdout)
-
-	logrus.Info()
 }
 
 func prettyfier(f *runtime.Frame) (function string, file string) {
