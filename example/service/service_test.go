@@ -41,7 +41,7 @@ var Setting = &Config{
 	},
 	Redis: &redis.Redis{
 		Config: redis.Config{
-			Host:     "",
+			Host:     "127.0.0.1:6379",
 			Username: "",
 			Password: "",
 			DB:       0,
