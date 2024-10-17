@@ -24,7 +24,7 @@ type Server struct {
 	HttpPort uint   `env:""`
 	RunMode  string `env:""`
 
-	httpServer *http.Server
+	httpServer *http.Server `skip:""`
 }
 
 func (s *Server) GetHttpPort() uint {

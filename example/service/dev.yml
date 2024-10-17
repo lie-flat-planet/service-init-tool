@@ -10,7 +10,7 @@ Mysql_Password: ""
 Mysql_User: root
 Name: xiaoxlm
 Redis_DB: 0
-Redis_Host: ""
+Redis_Host: 127.0.0.1:6379
 Redis_Password: ""
 Redis_PoolSize: 5
 Redis_Timeout: 0

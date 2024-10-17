@@ -89,7 +89,7 @@ func structEnvVar(v any) ([]byte, error) {
 			continue
 		}
 
-		if _, skipOK := fieldType.Tag.Lookup("skipEnv"); skipOK {
+		if _, skipOK := fieldType.Tag.Lookup("skip"); skipOK {
 			continue
 		}
 

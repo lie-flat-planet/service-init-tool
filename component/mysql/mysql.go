@@ -31,7 +31,7 @@ type Config struct {
 type Mysql struct {
 	Config
 
-	db *gorm.DB `skipEnv:""`
+	db *gorm.DB `skip:""`
 }
 
 // Init 会被工具自动执行。研发不应该调用该方法

@@ -26,7 +26,7 @@ type Config struct {
 type Redis struct {
 	Config
 
-	client *goRedis.Client `skipEnv:""`
+	client *goRedis.Client `skip:""`
 }
 
 // Init 会被工具自动执行。研发不应该调用该方法
