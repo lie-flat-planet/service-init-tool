@@ -3,6 +3,7 @@ package service
 import (
 	service_init_tool "github.com/lie-flat-planet/service-init-tool"
 	"github.com/lie-flat-planet/service-init-tool/component/mysql"
+	"github.com/lie-flat-planet/service-init-tool/component/prometheus"
 	"github.com/lie-flat-planet/service-init-tool/component/redis"
 	"github.com/lie-flat-planet/service-init-tool/util"
 	"github.com/sirupsen/logrus"
@@ -13,6 +14,7 @@ type Config struct {
 	Server *service_init_tool.Server
 	Mysql  *mysql.Mysql
 	Redis  *redis.Redis
+	Prom   *prometheus.Prom
 	Name   string `env:""`
 	Age    uint   `env:""`
 
@@ -38,6 +40,9 @@ var Setting = &Config{
 			MaxIdleConn: 5,
 			MaxOpenConn: 10,
 		},
+	},
+	Prom: &prometheus.Prom{
+		Addr: "1.2.3.4",
 	},
 	Redis: &redis.Redis{
 		Config: redis.Config{

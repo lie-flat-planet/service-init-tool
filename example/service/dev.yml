@@ -8,6 +8,7 @@ Mysql_MaxIdleConn: 5
 Mysql_MaxOpenConn: 10
 Mysql_Password: ""
 Mysql_User: root
+Prom_Addr: 1.2.3.4
 Name: xiaoxlm
 Redis_DB: 0
 Redis_Host: 127.0.0.1:6379
