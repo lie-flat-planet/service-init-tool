@@ -1,4 +1,4 @@
-package mysql
+package postgres
 
 import (
 	"database/sql/driver"
@@ -39,12 +39,4 @@ func (delete DeletedTime) MarshalJSON() ([]byte, error) {
 		return json.Marshal(delete.Time)
 	}
 	return json.Marshal("")
-}
-
-type TimestampAt struct {
-	CreatedAt   int64  `json:"createdAt" gorm:"autoCreateTime:true;not null"` // 自动创建时间戳(秒)
-	UpdatedAt   int64  `json:"updatedAt" gorm:"autoUpdateTime:true;not null"` // 自动更新时间戳(秒)
-	CreatedTime string `json:"createdTime" gorm:"-"`                          // 创建时间
-	UpdatedTime string `json:"updatedTime" gorm:"-"`                          // 更新时间
-	// DeletedAt soft_delete.DeletedAt `json:"deletedAt" gorm:"uniqueIndex:name"`
 }
