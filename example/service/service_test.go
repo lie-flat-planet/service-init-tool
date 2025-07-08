@@ -2,7 +2,7 @@ package service
 
 import (
 	service_init_tool "github.com/lie-flat-planet/service-init-tool"
-	"github.com/lie-flat-planet/service-init-tool/component/mysql"
+	"github.com/lie-flat-planet/service-init-tool/component/database"
 	"github.com/lie-flat-planet/service-init-tool/component/prometheus"
 	"github.com/lie-flat-planet/service-init-tool/component/redis"
 	"github.com/lie-flat-planet/service-init-tool/util"
@@ -12,7 +12,7 @@ import (
 
 type Config struct {
 	Server *service_init_tool.Server
-	Mysql  *mysql.Mysql
+	Mysql  *database.Mysql
 	Redis  *redis.Redis
 	Prom   *prometheus.Prom
 	Name   string `env:""`
@@ -31,8 +31,8 @@ var Setting = &Config{
 		Name: "demo",
 		Code: 999 * 1e3,
 	},
-	Mysql: &mysql.Mysql{
-		Config: mysql.Config{
+	Mysql: &database.Mysql{
+		MysqlConf: database.MysqlConf{
 			Host:        "127.0.0.1:3306",
 			User:        "root",
 			Password:    "",
