@@ -1,22 +1,20 @@
-package mysql
+package database
 
 import (
 	"fmt"
-	"github.com/lie-flat-planet/service-init-tool/component/option"
-	"github.com/sirupsen/logrus"
 	"sync"
-	"time"
+
+	"github.com/lie-flat-planet/service-init-tool/component/option"
 
 	gormMysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var (
 	mysqlOnce = &sync.Once{}
 )
 
-type Config struct {
+type MysqlConf struct {
 	Host        string `env:""`
 	User        string `env:""`
 	Password    string `env:""`
@@ -29,7 +27,7 @@ type Config struct {
 }
 
 type Mysql struct {
-	Config
+	MysqlConf
 
 	db *gorm.DB `skip:""`
 }
@@ -86,18 +84,11 @@ func (mysql *Mysql) MigrateTable(model ...any) error {
 }
 
 func (mysql *Mysql) dialAndSetConn(opts ...option.ClientOptionInterface[*gorm.Config, *gorm.DB]) error {
-	var gormOptions = []gorm.Option{
-		&gorm.Config{
-			DisableForeignKeyConstraintWhenMigrating: true, // 禁用自动创建数据库外键约束
-		},
-	}
-	for _, ops := range opts {
-		gormOptions = append(gormOptions, ops.(gorm.Option))
-	}
+	var gormOptions = listOptions(opts...)
 
 	if !mysql.IgnoreLog {
 		gormOptions = append(gormOptions, &gorm.Config{
-			Logger: mysql.newLogger(),
+			Logger: dbLogger(),
 		})
 	}
 
@@ -136,19 +127,6 @@ func (mysql *Mysql) formConfig() gormMysql.Config {
 	}
 
 	return mysqlConfig
-}
-
-func (mysql *Mysql) newLogger() logger.Interface {
-	return logger.New(
-		logrus.StandardLogger(),
-		logger.Config{
-			SlowThreshold:             200 * time.Millisecond,
-			Colorful:                  false,
-			IgnoreRecordNotFoundError: false,
-			ParameterizedQueries:      false,
-			LogLevel:                  logger.Info,
-		},
-	)
 }
 
 func (mysql *Mysql) ping() error {

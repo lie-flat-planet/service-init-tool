@@ -1,4 +1,4 @@
-package postgres
+package database
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ func (Key) TableName() string {
 }
 
 var pg = &Postgres{
-	Config: Config{
+	PostgresConf: PostgresConf{
 		Host:     "localhost",
 		User:     "swanlab",
 		Password: "xxx",

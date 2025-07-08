@@ -1,12 +1,18 @@
-package mysql
+package database
+
+import (
+	"time"
+
+	"github.com/lie-flat-planet/service-init-tool/component/option"
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+)
 
 import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
-	"time"
-
-	"gorm.io/gorm"
 )
 
 type Time struct {
@@ -47,4 +53,32 @@ type TimestampAt struct {
 	CreatedTime string `json:"createdTime" gorm:"-"`                          // 创建时间
 	UpdatedTime string `json:"updatedTime" gorm:"-"`                          // 更新时间
 	// DeletedAt soft_delete.DeletedAt `json:"deletedAt" gorm:"uniqueIndex:name"`
+}
+
+func listOptions(opts ...option.ClientOptionInterface[*gorm.Config, *gorm.DB]) []gorm.Option {
+	var options = []gorm.Option{
+		&gorm.Config{
+			DisableForeignKeyConstraintWhenMigrating: true, // 禁用自动创建数据库外键约束
+		},
+	}
+
+	for _, ops := range opts {
+		options = append(options, ops.(gorm.Option))
+	}
+
+	return options
+
+}
+
+func dbLogger() logger.Interface {
+	return logger.New(
+		logrus.StandardLogger(),
+		logger.Config{
+			SlowThreshold:             200 * time.Millisecond,
+			Colorful:                  false,
+			IgnoreRecordNotFoundError: false,
+			ParameterizedQueries:      false,
+			LogLevel:                  logger.Info,
+		},
+	)
 }

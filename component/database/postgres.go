@@ -1,23 +1,20 @@
-package postgres
+package database
 
 import (
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/lie-flat-planet/service-init-tool/component/option"
-	"github.com/sirupsen/logrus"
 
 	gormPostgres "gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var (
 	postgresOnce = &sync.Once{}
 )
 
-type Config struct {
+type PostgresConf struct {
 	Host                 string `env:""`
 	User                 string `env:""`
 	Password             string `env:""`
@@ -33,7 +30,7 @@ type Config struct {
 }
 
 type Postgres struct {
-	Config
+	PostgresConf
 
 	db *gorm.DB `skip:""`
 }
@@ -90,18 +87,11 @@ func (postgres *Postgres) MigrateTable(model ...any) error {
 }
 
 func (postgres *Postgres) dialAndSetConn(opts ...option.ClientOptionInterface[*gorm.Config, *gorm.DB]) error {
-	var gormOptions = []gorm.Option{
-		&gorm.Config{
-			DisableForeignKeyConstraintWhenMigrating: true, // 禁用自动创建数据库外键约束
-		},
-	}
-	for _, ops := range opts {
-		gormOptions = append(gormOptions, ops.(gorm.Option))
-	}
+	var gormOptions = listOptions(opts...)
 
 	if !postgres.IgnoreLog {
 		gormOptions = append(gormOptions, &gorm.Config{
-			Logger: postgres.newLogger(),
+			Logger: dbLogger(),
 		})
 	}
 
@@ -144,19 +134,6 @@ func (postgres *Postgres) formConfig() gormPostgres.Config {
 	}
 
 	return postgresConfig
-}
-
-func (postgres *Postgres) newLogger() logger.Interface {
-	return logger.New(
-		logrus.StandardLogger(),
-		logger.Config{
-			SlowThreshold:             200 * time.Millisecond,
-			Colorful:                  false,
-			IgnoreRecordNotFoundError: false,
-			ParameterizedQueries:      false,
-			LogLevel:                  logger.Info,
-		},
-	)
 }
 
 func (postgres *Postgres) ping() error {
