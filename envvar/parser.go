@@ -33,7 +33,7 @@ func (p *Parser) GetFlattenedEnvVarKeys() map[string]struct{} {
 	return m
 }
 
-func (p *Parser) FlattenEnvVar(dir string) error {
+func (p *Parser) GenerateEnvVarTemplate(dir string) error {
 	bytes, err := structEnvVar(p.setting)
 	if err != nil {
 		return err

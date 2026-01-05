@@ -26,7 +26,8 @@ func (m *Merger) Action() (structuralConfigInfo map[string]any, err error) {
 	mergedValue := make(map[string]any)
 
 	for _, src := range m.sources {
-		if src == nil {
+		// 解决 interface 陷阱问题。即这里 src 可能值为nil， 但类型不为 nil
+		if src == nil || (fmt.Sprintf("%v", src) == "<nil>") {
 			continue
 		}
 

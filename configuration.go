@@ -2,14 +2,15 @@ package service_init_tool
 
 import (
 	"fmt"
-	"github.com/lie-flat-planet/service-init-tool/config_source"
-	"github.com/lie-flat-planet/service-init-tool/enum"
-	"github.com/lie-flat-planet/service-init-tool/envvar"
 	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"strings"
+
+	"github.com/lie-flat-planet/service-init-tool/config_source"
+	"github.com/lie-flat-planet/service-init-tool/enum"
+	"github.com/lie-flat-planet/service-init-tool/envvar"
 )
 
 func Init(dir string, setting any) error {
@@ -53,7 +54,7 @@ func (conf *configuration) initSetting(setting any) error {
 	}
 
 	// 解析并生成开发环境的环境变量参考文件
-	if err := conf.parser.FlattenEnvVar(conf.dir); err != nil {
+	if err := conf.parser.GenerateEnvVarTemplate(conf.dir); err != nil {
 		return err
 	}
 	conf.injectEnvVarMerger()
@@ -78,26 +79,69 @@ func (conf *configuration) getConfigValue() (configValue map[string]any, err err
 }
 
 func (conf *configuration) injectEnvVarMerger() {
-	conf.envVarMerger = envvar.NewMerger(conf.parser.GetFlattenedEnvVarKeys(), conf.listEnvVarSource()...)
-}
+	var envVarSources []config_source.ISource
 
-func (conf *configuration) listEnvVarSource() []config_source.ISource {
-	list := []config_source.ISource{config_source.NewEnvVar()}
-
-	if conf.env == enum.EnvDev || conf.env == "" {
-		localYMLPath := conf.dir + "/local.yml"
-
-		_, err := os.Stat(localYMLPath)
-		if err == nil {
-			list = append(list, config_source.NewYamlFile(localYMLPath))
-		} else {
-			if !os.IsNotExist(err) {
-				panic(err)
-			}
-		}
+	// 优先级，1为最高
+	if conf.env == enum.EnvTest {
+		envVarSources = append(envVarSources, conf.envVarsFromTestYML()) // 5
 	}
 
-	return list
+	if conf.env == enum.EnvStaging {
+		envVarSources = append(envVarSources, conf.envVarsFromStagingYML()) // 4
+	}
+
+	envVarSources = append(envVarSources, conf.envVarsFromHotFixYML()) // 3
+
+	envVarSources = append(envVarSources, config_source.NewEnvVar()) // 2
+
+	if conf.env == enum.EnvDev || conf.env == "" {
+		envVarSources = append(envVarSources, conf.envVarsFromLocalYML()) // 1
+	}
+
+	conf.envVarMerger = envvar.NewMerger(conf.parser.GetFlattenedEnvVarKeys(), envVarSources...)
+}
+
+// 1
+func (conf *configuration) envVarsFromLocalYML() *config_source.YamlFile {
+	localYMLPath := conf.dir + "/local.yml"
+
+	return conf.formYamlFile(localYMLPath)
+}
+
+// 2 envvar (线上建议使用 envvar 的配置方式)
+
+// 3
+func (conf *configuration) envVarsFromHotFixYML() *config_source.YamlFile {
+	featureYMLPath := conf.dir + "/hot-fix.yml"
+
+	return conf.formYamlFile(featureYMLPath)
+}
+
+// 4
+func (conf *configuration) envVarsFromStagingYML() *config_source.YamlFile {
+	stagingYMLPath := conf.dir + "/staging.yml"
+
+	return conf.formYamlFile(stagingYMLPath)
+}
+
+// 5
+func (conf *configuration) envVarsFromTestYML() *config_source.YamlFile {
+	testYMLPath := conf.dir + "/test.yml"
+
+	return conf.formYamlFile(testYMLPath)
+}
+
+func (conf *configuration) formYamlFile(filepath string) *config_source.YamlFile {
+	_, err := os.Stat(filepath)
+	if err == nil {
+		return config_source.NewYamlFile(filepath)
+	}
+
+	if !os.IsNotExist(err) {
+		panic(err)
+	}
+
+	return nil
 }
 
 // TODO
