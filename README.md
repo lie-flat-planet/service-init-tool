@@ -69,14 +69,15 @@ func main() {
 3. hot-fix.yml    ← 热修复配置
 4. staging.yml    ← 预发布环境
 5. test.yml       ← 测试环境
+6. test.yml       ← 开发环境
 ```
 
 ### 自动生成配置模板
 
-执行 `Init()` 后会自动生成 `dev.yml` 模板文件：
+执行 `Init()` 后会自动生成 `tmpl.yml` 模板文件：
 
 ```yaml
-# dev.yml - 自动生成的环境变量参考
+# tmpl.yml - 自动生成的环境变量参考
 AppName: demo
 Port: 8080
 Mysql_Host: 127.0.0.1:3306

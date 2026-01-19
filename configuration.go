@@ -81,6 +81,10 @@ func (conf *configuration) getConfigValue() (configValue map[string]any, err err
 func (conf *configuration) injectEnvVarMerger() {
 	var envVarSources []config_source.ISource
 
+	if conf.env == enum.EnvDev || conf.env == "" {
+		envVarSources = append(envVarSources, conf.envVarsFromDevYML()) // 6
+	}
+
 	// 优先级，1为最高
 	if conf.env == enum.EnvTest {
 		envVarSources = append(envVarSources, conf.envVarsFromTestYML()) // 5
@@ -94,9 +98,7 @@ func (conf *configuration) injectEnvVarMerger() {
 
 	envVarSources = append(envVarSources, config_source.NewEnvVar()) // 2
 
-	if conf.env == enum.EnvDev || conf.env == "" {
-		envVarSources = append(envVarSources, conf.envVarsFromLocalYML()) // 1
-	}
+	envVarSources = append(envVarSources, conf.envVarsFromLocalYML()) // 1
 
 	conf.envVarMerger = envvar.NewMerger(conf.parser.GetFlattenedEnvVarKeys(), envVarSources...)
 }
@@ -122,6 +124,13 @@ func (conf *configuration) envVarsFromStagingYML() *config_source.YamlFile {
 	stagingYMLPath := conf.dir + "/staging.yml"
 
 	return conf.formYamlFile(stagingYMLPath)
+}
+
+// 6
+func (conf *configuration) envVarsFromDevYML() *config_source.YamlFile {
+	testYMLPath := conf.dir + "/dev.yml"
+
+	return conf.formYamlFile(testYMLPath)
 }
 
 // 5

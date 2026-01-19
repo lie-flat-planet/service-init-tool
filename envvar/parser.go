@@ -46,15 +46,15 @@ func (p *Parser) GenerateEnvVarTemplate(dir string) error {
 
 	util.FlattenMap("", values, p.flattenedEnvVar)
 
-	if err = p.generateDevYML(dir); err != nil {
+	if err = p.generateTemplateYML(dir); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (p *Parser) generateDevYML(dir string) error {
-	filename := "dev.yml"
+func (p *Parser) generateTemplateYML(dir string) error {
+	filename := "a_tmpl.yml"
 
 	filename = filepath.Join(dir, filename)
 
